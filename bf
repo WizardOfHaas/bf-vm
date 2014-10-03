@@ -68,6 +68,8 @@ while($ip < scalar(@code))
 	}
     }elsif($e eq '.'){
 	print chr($stack[$sp]);
+    }elsif($e =~ m/[0-9A-F]/){
+	$stack[$sp] += hex($e) * 10;
     }
 
     if($ARGV[1] && $ARGV[1] eq 'v')
