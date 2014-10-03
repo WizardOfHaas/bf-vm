@@ -1,0 +1,6 @@
+ss 'Hello World!',13,10,0
+
+do
+	out
+	push
+loop
