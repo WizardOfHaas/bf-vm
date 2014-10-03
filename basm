@@ -108,6 +108,7 @@ foreach(@code)
 	    $ip += $jmp_tab{$loc} + 4;
 	}
 	$bf .= '?';	
+    }elsif($loc =~ m/^ssp/){
     }
 }
 

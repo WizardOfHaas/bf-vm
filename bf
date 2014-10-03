@@ -69,12 +69,14 @@ while($ip < scalar(@code))
 	}
     }elsif($e eq '.'){
 	print chr($stack[$sp]);
-    }elsif($e =~ m/[0-9A-Fa-f]/){#Type I Extensions
+    }elsif($e =~ m/[0-9A-Fa-f]/){#Type I Extensions #Fast Init
 	$stack[$sp] += hex($e) * 10;
-    }elsif($e eq '$'){
+    }elsif($e eq '$'){#Set sto
 	$sto = $stack[$sp];
-    }elsif($e eq '!'){
+    }elsif($e eq '!'){#Get sto
 	$stack[$sp] = $sto;
+    }elsif($e eq '@'){#jmp to sto stack
+	$sp = $sto;
     }
 
     if($ARGV[1] && $ARGV[1] eq 'v')
@@ -86,7 +88,7 @@ while($ip < scalar(@code))
     if($e eq '?')
     {
 	$ip = $stack[$sp];
-    }elsif($e eq '^'){
+    }elsif($e eq '^'){#jmp to sto ip
 	$ip = $sto;
     }
     else
