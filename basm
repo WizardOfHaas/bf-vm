@@ -1,0 +1,113 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+open CODE, "<", $ARGV[0] or die 'No Input File\n';
+
+my @code = <CODE>;
+my @stack;
+my %jmp_tab;
+my $bf = "";
+my $sp = 0;
+my $ip = 0;
+
+foreach(@code)
+{
+    my $loc = $_;
+    $loc =~ s/^\s+|\s+$//g;
+    
+    #Primatives:
+    if($loc =~ m/^ss/)#Store on Stack
+    {
+	$loc =~ s/ss //g;
+	my @vars = split(',', $loc);
+	foreach(@vars)
+	{
+	    if($_ =~ m/^'/)
+	    {
+		$_ =~ s/^'|'$//g;
+		my @chars = split('', $_);
+		foreach(@chars)
+		{
+		    push(@stack, ord($_));
+		}
+	    }
+	    else
+	    {
+		push(@stack, $_);
+	    }
+	}
+    }elsif($loc =~ m/^add/){#Add
+	$loc =~ s/add //g;
+	$bf .= '+'x$loc;
+	$ip += $loc;
+    }elsif($loc =~ m/^sub/){#Subtract
+	$loc =~ s/sub //g;
+	$bf .= '-'x$loc;
+	$ip += $loc;
+    }elsif($loc =~ m/^push/){#Advance
+	$bf .= '>';
+	$sp++;
+	$ip++;
+    }elsif($loc =~ m/^pop/){#Un-Advance
+	$bf .= '<';
+	$sp--;
+	$ip++;
+    }elsif($loc eq 'do'){#Start loop
+	$bf .= '[';
+	$ip++;
+    }elsif($loc eq 'loop'){#Jump back to loop
+	$bf .= ']';
+	$ip++;
+    }elsif($loc =~ m/^out/){#Print
+	$bf .= '.';
+	$ip++;
+    }
+    #CISC instructions
+    elsif($loc =~ m/^mov/){
+	$bf .= '[-]';
+	$loc =~ s/mov //g;
+	$bf .= '+'x$loc;
+	$ip += $loc + 3;
+    }elsif($loc =~ m/^sjmp/){
+	$loc =~ s/sjmp //g;
+
+	my $jmp = 0;
+	if($loc > $sp){
+	    $jmp = $loc - $sp;
+	    $bf .= '>'x$jmp;
+	    $sp += $jmp;
+	    $ip += $jmp;
+	}elsif($loc < $sp){
+	    $jmp = $sp - $loc;
+	    $bf .= '<'x$jmp;
+	    $sp -= $jmp;
+	    $ip += $jmp;
+	}
+	
+	$ip += $jmp;
+    }elsif($loc =~ m/:$/){#Label marker for double-pass goes here
+	$jmp_tab{$loc} = $ip;
+    }elsif($loc eq 'jmp'){#Unconditional jump to pointer
+	$bf .= '?';
+	$ip++;
+    }elsif($loc =~ m/^jmp/){#Unconditional jump to label
+	$loc =~ s/^jmp //g;
+	$bf .= '[-]';
+	if($loc =~ m/[0-9]+/)
+	{
+	    $bf .= '+'x$loc;
+	    $ip += $loc + 4;
+	}
+	else
+	{
+	    $bf .= '+'x$jmp_tab{$loc};
+	    $ip += $jmp_tab{$loc} + 4;
+	}
+	$bf .= '?';	
+    }
+}
+
+print "{".join("|", @stack)."}\n";
+print $bf."\n";
