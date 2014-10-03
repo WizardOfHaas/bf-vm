@@ -40,8 +40,9 @@ foreach(@code)
 	}
     }elsif($loc =~ m/^add/){#Add
 	$loc =~ s/add //g;
-	$bf .= '+'x$loc;
-	$ip += $loc;
+	$bf .= sprintf('%x', $loc/10);
+	$bf .= '+'x($loc%10);
+	$ip += ($loc%10) + 1;
     }elsif($loc =~ m/^sub/){#Subtract
 	$loc =~ s/sub //g;
 	$bf .= '-'x$loc;
@@ -68,8 +69,9 @@ foreach(@code)
     elsif($loc =~ m/^mov/){
 	$bf .= '[-]';
 	$loc =~ s/mov //g;
-	$bf .= '+'x$loc;
-	$ip += $loc + 3;
+	$bf .= sprintf("%x", $loc/10);
+	$bf .= '+'x($loc%10);
+	$ip += ($loc%10) + 4;
     }elsif($loc =~ m/^sjmp/){
 	$loc =~ s/sjmp //g;
 

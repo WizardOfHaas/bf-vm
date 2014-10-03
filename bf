@@ -5,6 +5,7 @@ use warnings;
 
 my $ip = 0;
 my $sp = 0;
+my $sto = 0;
 
 my @stack;
 my @jmp_stack;
@@ -68,8 +69,12 @@ while($ip < scalar(@code))
 	}
     }elsif($e eq '.'){
 	print chr($stack[$sp]);
-    }elsif($e =~ m/[0-9A-F]/){
+    }elsif($e =~ m/[0-9A-Fa-f]/){#Type I Extensions
 	$stack[$sp] += hex($e) * 10;
+    }elsif($e eq '$'){
+	$sto = $stack[$sp];
+    }elsif($e eq '!'){
+	$stack[$sp] = $sto;
     }
 
     if($ARGV[1] && $ARGV[1] eq 'v')
@@ -81,6 +86,8 @@ while($ip < scalar(@code))
     if($e eq '?')
     {
 	$ip = $stack[$sp];
+    }elsif($e eq '^'){
+	$ip = $sto;
     }
     else
     {
