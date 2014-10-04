@@ -112,5 +112,5 @@ foreach(@code)
     }
 }
 
-print "{".join("|", @stack)."}\n";
 print $bf."\n";
+print "@".join("|", @stack);
