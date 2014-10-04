@@ -7,7 +7,6 @@ my $ip = 0;
 my $sp = 0;
 my $sto = 0;
 
-my @stack;
 my @jmp_stack;
 
 open CODE, '<', $ARGV[0];
@@ -15,12 +14,9 @@ open CODE, '<', $ARGV[0];
 my @code = <CODE>;
 my $codestr = join("", @code);
 $codestr =~ s/\R//g;
-@code = split("", $codestr);
-
-@stack = split('}', $codestr);
-my $stackstr = $stack[0];
-$stackstr =~ s/{//g;
-@stack = split(/\|/, $stackstr);
+@code = split("@", $codestr);
+my @stack = split(m/\|/, $code[1]);
+@code = split("", $code[0]);
 
 while($ip < scalar(@code))
 {
@@ -76,7 +72,7 @@ while($ip < scalar(@code))
     }elsif($e eq '!'){#Get sto
 	$stack[$sp] = $sto;
     }elsif($e eq '@'){#jmp to sto stack
-	$sp = $sto;
+	die;
     }
 
     if($ARGV[1] && $ARGV[1] eq 'v')
