@@ -2,11 +2,14 @@
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 my $ip = 0;
 
 my $sp = 0;
 my $sn = 0;
+my $sp0 = 0;
+my $sp1 = 0;
 
 my $sto = 0;
 
@@ -18,10 +21,13 @@ my @code = <CODE>;
 my $codestr = join("", @code);
 $codestr =~ s/\R//g;
 @code = split("@", $codestr);
-my @stack = split(m/\|/, $code[1]);
+my @stack;
+@stack = split(m/\|/, $code[1]) if defined $code[1];
 @code = split("", $code[0]);
 
-my @stacks = ([@stack], []);
+my @stacks;
+push(@stacks, \@stack);
+push(@stacks, [0]);
 
 while($ip < scalar(@code))
 {
@@ -76,17 +82,34 @@ while($ip < scalar(@code))
 	$sto = $stacks[$sn][$sp];
     }elsif($e eq '!'){#Get sto
 	$stacks[$sn][$sp] = $sto;
-    }elsif($e eq '@'){#jmp to sto stack
-	die;
+    }elsif($e eq '@'){#end of program
+	exit;
+    }elsif($e eq '{'){#My Extensions #Swap stack
+	$sn = 1;
+	$sp0 = $sp;
+	$sp = $sp1;
+    }elsif($e eq '}'){#Swap back stack
+	$sn = 0;
+	$sp1 = $sp;
+	$sp = $sp0;
     }
 
     if($ARGV[1] && $ARGV[1] eq 'v')
     {
-	print $e;
-	print "\n".join('|', $stacks[$sn])."\n";
+	print $e."\n";
+	#print join("|", $stacks[$sn])."\n";
+	for my $s(0..$#stacks)
+	{
+	    my @in_stack = $stacks[$s];
+	    for my $c(0..$#in_stack)
+	    {
+		print $stacks[$s][$c]."|";
+	    }
+	    print "\n";
+	}
     }
 
-    if($e eq '?')
+    if($e eq '?')#jmp to stack ip
     {
 	$ip = $stacks[$sn][$sp];
     }elsif($e eq '^'){#jmp to sto ip
